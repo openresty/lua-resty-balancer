@@ -293,6 +293,8 @@ chash_point_add(chash_point_t *old_points, uint32_t old_length,
         new_points[k].hash = tmp_points[j].hash;
         new_points[k].id = tmp_points[j].id;
     }
+
+    free(tmp_points);
 }
 
 
@@ -323,6 +325,8 @@ chash_point_reduce(chash_point_t *old_points, uint32_t old_length,
         }
         k++;
     }
+
+    free(tmp_points);
 }
 
 
