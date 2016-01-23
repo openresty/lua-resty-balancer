@@ -327,20 +327,22 @@ local function _find_id(points, npoints, hash)
     end
 
     if hash >= points[index].hash then
-        for i = index, max_index do
-            if i == max_index or hash < points[i + 1].hash then
+        for i = index, max_index - 1 do
+            if hash < points[i + 1].hash then
                 return points[i].id
             end
         end
+
+        return points[max_index].id
     end
 
     for i = index - 1, 0, -1 do
-        if i == 0 or hash >= points[i].hash then
+        if hash >= points[i].hash then
             return points[i].id
         end
     end
 
-    return points[0].id
+    return points[max_index].id
 end
 
 
