@@ -2,6 +2,7 @@
 -- some of them borrow from https://github.com/cloudflare/lua-resty-json
 --
 
+local bit = require "bit"
 local ffi = require 'ffi'
 
 
@@ -13,6 +14,7 @@ local floor = math.floor
 local pairs = pairs
 local tostring = tostring
 local tonumber = tonumber
+local bxor = bit.bxor
 
 
 ffi.cdef[[
@@ -106,7 +108,7 @@ local function _precompute(nodes)
     local start, index = 0, 0
     for id, weight in pairs(nodes) do
         local num = weight * CONSISTENT_POINTS
-        local base_hash = crc32(tostring(id))
+        local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
 
         index = index + 1
         ids[index] = id
@@ -141,7 +143,7 @@ local function _precompute2(nodes)
     local start, index = 0, 0
     for id, weight in pairs(nodes) do
         local num = weight * CONSISTENT_POINTS
-        local base_hash = crc32(tostring(id))
+        local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
 
         index = index + 1
         ids[index] = id
@@ -246,7 +248,7 @@ local function _up(self, id, weight)
         self.size = new_npoints
     end
 
-    local base_hash = crc32(tostring(id))
+    local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
     clib.chash_point_add(self.points, self.npoints, base_hash,
                          old_weight * CONSISTENT_POINTS,
                          weight * CONSISTENT_POINTS,
@@ -278,7 +280,7 @@ local function _down(self, id, weight)
         index = index + 1
     end
 
-    local base_hash = crc32(tostring(id))
+    local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
     clib.chash_point_reduce(self.points, self.npoints, base_hash,
                             (old_weight - weight) * CONSISTENT_POINTS,
                             CONSISTENT_POINTS * weight,
@@ -326,23 +328,24 @@ local function _find_id(points, npoints, hash)
         index = max_index
     end
 
-    if hash >= points[index].hash then
-        for i = index, max_index - 1 do
-            if hash < points[i + 1].hash then
+    -- find the first points >= hash
+    if points[index].hash >= hash then
+        for i = index, 1, -1 do
+            if points[i - 1].hash < hash then
                 return points[i].id
             end
         end
 
-        return points[max_index].id
+        return points[0].id
     end
 
-    for i = index - 1, 0, -1 do
-        if hash >= points[i].hash then
+    for i = index + 1, max_index do
+        if hash <= points[i].hash then
             return points[i].id
         end
     end
 
-    return points[max_index].id
+    return points[0].id
 end
 
 
