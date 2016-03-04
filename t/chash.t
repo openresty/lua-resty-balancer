@@ -13,7 +13,7 @@ $ENV{TEST_NGINX_CWD} = $pwd;
 
 our $HttpConfig = qq{
     lua_package_path "$pwd/lib/?.lua;;";
-    lua_package_cpath "/usr/local/lib/?.so;;";
+    lua_package_cpath "$pwd/?.so;;";
 };
 
 no_long_string();
@@ -71,6 +71,7 @@ points number: 2080
 === TEST 2: compare with nginx chash
 --- http_config
     lua_package_path "$TEST_NGINX_CWD/lib/?.lua;;";
+    lua_package_cpath "$TEST_NGINX_CWD/?.so;;";
 
     server {
         listen          1985;

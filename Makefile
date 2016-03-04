@@ -31,6 +31,8 @@ ${OBJ} : %.o : %.c
 ${C_SO_NAME} : ${OBJ}
 	$(CC) $(THE_CFLAGS) -DBUILDING_SO $^ -shared -o $@
 
+#export TEST_NGINX_NO_CLEAN=1
+
 clean:; rm -f *.o *.so a.out *.d
 
 install:

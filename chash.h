@@ -40,7 +40,6 @@ typedef struct {
 void chash_point_init(chash_point_t *points, uint32_t base_hash,
     uint32_t start, uint32_t num, uint32_t id) LCH_EXPORT;
 void chash_point_sort(chash_point_t *points, uint32_t npoints) LCH_EXPORT;
-void chash_point_sort2(chash_point_t *points, uint32_t npoints) LCH_EXPORT;
 
 void chash_point_add(chash_point_t *old_points, uint32_t old_length,
     uint32_t base_hash, uint32_t from, uint32_t num, uint32_t id,

@@ -236,31 +236,6 @@ insert:
 }
 
 
-static int
-cmp(const void *one, const void *two)
-{
-    chash_point_t *first = (chash_point_t *) one;
-    chash_point_t *second = (chash_point_t *) two;
-
-    if (first->hash < second->hash) {
-        return -1;
-
-    } else if (first->hash > second->hash) {
-        return 1;
-
-    } else {
-        return 0;
-    }
-}
-
-
-void
-chash_point_sort2(chash_point_t arr[], uint32_t n)
-{
-    qsort(arr, n, sizeof(chash_point_t), cmp);
-}
-
-
 void
 chash_point_add(chash_point_t *old_points, uint32_t old_length,
     uint32_t base_hash, uint32_t from, uint32_t num, uint32_t id,

@@ -28,7 +28,6 @@ typedef struct {
 void chash_point_init(chash_point_t *points, uint32_t base_hash, uint32_t start,
     uint32_t num, uint32_t id);
 void chash_point_sort(chash_point_t *points, uint32_t size);
-void chash_point_sort2(chash_point_t *points, uint32_t size);
 
 void chash_point_add(chash_point_t *old_points, uint32_t old_length,
     uint32_t base_hash, uint32_t from, uint32_t num, uint32_t id,
@@ -124,58 +123,8 @@ local function _precompute(nodes)
 end
 
 
-local function _precompute2(nodes)
-    local n, total_weight = 0, 0
-    for id, weight in pairs(nodes) do
-        n = n + 1
-        total_weight = total_weight + weight
-    end
-
-    local newnodes = new_tab(0, n)
-    for id, weight in pairs(nodes) do
-        newnodes[id] = weight
-    end
-
-    local ids = new_tab(n, 0)
-    local npoints = total_weight * CONSISTENT_POINTS
-    local points = ffi_new(chash_point_t, npoints)
-
-    local start, index = 0, 0
-    for id, weight in pairs(nodes) do
-        local num = weight * CONSISTENT_POINTS
-        local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
-
-        index = index + 1
-        ids[index] = id
-
-        clib.chash_point_init(points, base_hash, start, num, index)
-
-        start = start + num
-    end
-
-    clib.chash_point_sort2(points, npoints)
-
-    return ids, points, npoints, newnodes
-end
-
-
 function _M.new(_, nodes)
     local ids, points, npoints, newnodes = _precompute(nodes)
-
-    local self = {
-        nodes = newnodes,  -- it's safer to copy one
-        ids = ids,
-        points = points,
-        npoints = npoints,    -- points number
-        size = npoints,
-    }
-    return setmetatable(self, mt)
-end
-
-
--- just for benchmark
-function _M.new2(_, nodes)
-    local ids, points, npoints, newnodes = _precompute2(nodes)
 
     local self = {
         nodes = newnodes,  -- it's safer to copy one
@@ -305,15 +254,6 @@ function _M.set(self, id, new_weight)
     end
 
     return _down(self, id, old_weight - new_weight)
-end
-
-
-function _M.simple_find(self, key)
-    local index = crc32(tostring(key)) % self.npoints
-
-    local id = self.points[index].id
-
-    return self.ids[id]
 end
 
 
