@@ -18,6 +18,7 @@ Table of Contents
     * [up](#up)
     * [down](#down)
     * [find](#find)
+    * [next](#next)
 * [Installation](#installation)
 * [Performance](#performance)
 * [Author](#author)
@@ -158,7 +159,15 @@ The `weight` default to be `1`.
 
 find
 --------
-**syntax:** `id = obj:find(key)`
+**syntax:** `id, index = obj:find(key)`
+
+[Back to TOC](#table-of-contents)
+
+next
+--------
+**syntax:** `id, new_index = obj:next(old_index)`
+
+Return the next one.
 
 [Back to TOC](#table-of-contents)
 

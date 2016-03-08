@@ -169,3 +169,37 @@ ok
 --- error_code: 200
 --- no_error_log
 [error]
+
+
+
+=== TEST 3: next
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            local resty_chash = require "resty.chash"
+
+            local servers = {
+                ["server1"] = 2,
+                ["server2"] = 2,
+                ["server3"] = 1,
+            }
+
+            local chash = resty_chash:new(servers)
+
+            local id, idx = chash:find("foo")
+            ngx.say(id, ", ", idx)
+
+            for i = 1, 100 do
+                id, idx = chash:next(idx)
+            end
+            ngx.say(id, ", ", idx)
+        }
+    }
+--- request
+GET /t
+--- response_body
+server1, 434
+server2, 534
+--- no_error_log
+[error]

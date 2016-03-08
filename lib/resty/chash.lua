@@ -272,29 +272,37 @@ local function _find_id(points, npoints, hash)
     if points[index].hash >= hash then
         for i = index, 1, -1 do
             if points[i - 1].hash < hash then
-                return points[i].id
+                return points[i].id, i
             end
         end
 
-        return points[0].id
+        return points[0].id, 0
     end
 
     for i = index + 1, max_index do
         if hash <= points[i].hash then
-            return points[i].id
+            return points[i].id, i
         end
     end
 
-    return points[0].id
+    return points[0].id, 0
 end
 
 
 function _M.find(self, key)
     local hash = crc32(tostring(key))
 
-    local id = _find_id(self.points, self.npoints, hash)
+    local id, index = _find_id(self.points, self.npoints, hash)
 
-    return self.ids[id]
+    return self.ids[id], index
+end
+
+
+function _M.next(self, index)
+    local new_index = (index + 1) % self.npoints
+    local id = self.points[new_index].id
+
+    return self.ids[id], new_index
 end
 
 
