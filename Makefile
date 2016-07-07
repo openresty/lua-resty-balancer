@@ -41,7 +41,7 @@ install:
 	$(INSTALL) $(C_SO_NAME) $(DESTDIR)$(LUA_LIB_DIR)/
 
 test : all
-	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t/chash.t
+	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t
 
 bench:
 	$(OPENRESTY_PREFIX)/bin/resty t/bench.lua
