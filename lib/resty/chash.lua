@@ -168,7 +168,7 @@ end
 _M.delete = _delete
 
 
-local function _up(self, id, weight)
+local function _incr(self, id, weight)
     local weight = tonumber(weight) or 1
     local nodes = self.nodes
     local ids = self.ids
@@ -206,10 +206,10 @@ local function _up(self, id, weight)
     self.points = new_points
     self.npoints = new_npoints
 end
-_M.up = _up
+_M.incr = _incr
 
 
-local function _down(self, id, weight)
+local function _decr(self, id, weight)
     local weight = tonumber(weight) or 1
     local nodes = self.nodes
     local ids = self.ids
@@ -238,7 +238,7 @@ local function _down(self, id, weight)
     nodes[id] = old_weight - weight
     self.npoints = self.npoints - CONSISTENT_POINTS * weight
 end
-_M.down = _down
+_M.decr = _decr
 
 
 function _M.set(self, id, new_weight)
@@ -250,10 +250,10 @@ function _M.set(self, id, new_weight)
     end
 
     if old_weight < new_weight then
-        return _up(self, id, new_weight - old_weight)
+        return _incr(self, id, new_weight - old_weight)
     end
 
-    return _down(self, id, old_weight - new_weight)
+    return _decr(self, id, old_weight - new_weight)
 end
 
 

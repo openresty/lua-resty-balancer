@@ -1,6 +1,6 @@
 
 -- XX my local path
-local my_local_dir = "/home/dou/work/git/doujiang/lua-resty-chash/"
+local my_local_dir = "/home/dou/work/git/doujiang/lua-resty-balancer/"
 
 package.path = my_local_dir .. "lib/?.lua;" .. package.path
 package.cpath = my_local_dir .. "?.so;" .. package.cpath
@@ -100,7 +100,7 @@ local function gen_func(typ)
                 ["server3" .. i] = 1,
             }
             local chash = resty_chash:new(servers)
-            chash:up("server3" .. i)
+            chash:incr("server3" .. i)
         end, typ
     end
 
@@ -114,7 +114,7 @@ local function gen_func(typ)
                 ["server3" .. i] = 1,
             }
             local chash = resty_chash:new(servers)
-            chash:up("server1" .. i)
+            chash:incr("server1" .. i)
         end, typ
     end
 
@@ -128,7 +128,7 @@ local function gen_func(typ)
                 ["server3" .. i] = 1,
             }
             local chash = resty_chash:new(servers)
-            chash:down("server1" .. i)
+            chash:decr("server1" .. i)
         end, typ
     end
 
@@ -231,9 +231,9 @@ bench(1 * 1000, "chash new servers2", resty_chash.new, nil, nil, servers2)
 bench(10 * 1000, "chash new servers3", resty_chash.new, nil, nil, servers3)
 bench(10 * 1000, "new in func", gen_func(0))
 bench(10 * 1000, "new dynamic", gen_func(1))
-bench(10 * 1000, "up server3", gen_func(2))
-bench(10 * 1000, "up server1", gen_func(3))
-bench(10 * 1000, "down server1", gen_func(4))
+bench(10 * 1000, "incr server3", gen_func(2))
+bench(10 * 1000, "incr server1", gen_func(3))
+bench(10 * 1000, "decr server1", gen_func(4))
 bench(10 * 1000, "delete server3", gen_func(5))
 bench(10 * 1000, "delete server1", gen_func(6))
 bench(10 * 1000, "set server1 9", gen_func(7))

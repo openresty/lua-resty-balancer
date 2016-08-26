@@ -88,7 +88,7 @@ end
 _M.delete = _delete
 
 
-local function _down(self, id, weight)
+local function _decr(self, id, weight)
     local weight = tonumber(weight) or 1
     local nodes = self.nodes
 
@@ -109,10 +109,10 @@ local function _down(self, id, weight)
         self.cw = self.max_weight
     end
 end
-_M.down = _down
+_M.decr = _decr
 
 
-local function _up(self, id, weight)
+local function _incr(self, id, weight)
     local weight = tonumber(weight) or 1
     local nodes = self.nodes
 
@@ -120,7 +120,7 @@ local function _up(self, id, weight)
 
     self.gcd, self.max_weight = get_gcd(nodes)
 end
-_M.up = _up
+_M.incr = _incr
 
 
 
@@ -133,10 +133,10 @@ function _M.set(self, id, new_weight)
     end
 
     if old_weight < new_weight then
-        return _up(self, id, new_weight - old_weight)
+        return _incr(self, id, new_weight - old_weight)
     end
 
-    return _down(self, id, old_weight - new_weight)
+    return _decr(self, id, old_weight - new_weight)
 end
 
 

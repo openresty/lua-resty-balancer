@@ -2,6 +2,7 @@ Name
 ====
 
 lua-resty-chash - A generic consistent hash implementation for OpenResty/LuaJIT
+lua-resty-roundrobin - A generic roundrobin implementation for OpenResty/LuaJIT
 
 Table of Contents
 =================
@@ -15,8 +16,8 @@ Table of Contents
     * [reinit](#reinit)
     * [set](#set)
     * [delete](#delete)
-    * [up](#up)
-    * [down](#down)
+    * [incr](#incr)
+    * [decr](#decr)
     * [find](#find)
     * [next](#next)
 * [Installation](#installation)
@@ -34,6 +35,8 @@ Description
 ===========
 
 This Lua library can be used with `balancer_by_lua*`.
+
+Both `resty.chash` and `resty.roundrobin` have the same apis.
 
 Synopsis
 ========
@@ -56,6 +59,7 @@ Synopsis
 
         local servers, nodes = {}, {}
         for serv, weight in pairs(server_list) do
+            -- XX: we can just use serv as id when we doesn't need keep consistency with nginx chash
             local id = string.gsub(serv, ":", str_null)
 
             servers[id] = serv
@@ -105,6 +109,8 @@ Instantiates an object of this class. The `class` value is returned by the call 
 The `id` should be `table.concat({host, string.char(0), port})` like the nginx chash does,
 when we need to keep consistency with nginx chash.
 
+The `id` can be any string value when we do not need to keep consistency with nginx chash.
+
 ```lua
 local nodes = {
     -- id => weight
@@ -127,11 +133,15 @@ reinit
 --------
 **syntax:** `obj:reinit(nodes)`
 
+Reinit the chash obj with the new nodes.
+
 [Back to TOC](#table-of-contents)
 
 set
 --------
 **syntax:** `obj:set(id, weight)`
+
+Set `weight` of the `id`.
 
 [Back to TOC](#table-of-contents)
 
@@ -139,21 +149,23 @@ delete
 --------
 **syntax:** `obj:delete(id)`
 
-[Back to TOC](#table-of-contents)
-
-up
---------
-**syntax:** `obj:up(id, weight?)`
-
-The `weight` default to be `1`.
+Delete the `id`.
 
 [Back to TOC](#table-of-contents)
 
-down
+incr
 --------
-**syntax:** `obj:down(id, weight?)`
+**syntax:** `obj:incr(id, weight?)`
 
-The `weight` default to be `1`.
+Increments weight for the `id` by the step value `weight`(default to 1).
+
+[Back to TOC](#table-of-contents)
+
+decr
+--------
+**syntax:** `obj:decr(id, weight?)`
+
+Decrease weight for the `id` by the step value `weight`(default to 1).
 
 [Back to TOC](#table-of-contents)
 
@@ -161,13 +173,20 @@ find
 --------
 **syntax:** `id, index = obj:find(key)`
 
+Find an id by the `key`, same key always return the same `id` in the same `obj`.
+
+The second return value `index` is the index in the chash circle of the hash value of the `key`
+
 [Back to TOC](#table-of-contents)
 
 next
 --------
 **syntax:** `id, new_index = obj:next(old_index)`
 
-Return the next one.
+If we may have chance to retry when the first `id`(server) doesn't work well,
+then we can use `obj:next` to get the next `id`.
+
+The new `id` may be the same as the old one.
 
 [Back to TOC](#table-of-contents)
 
@@ -221,15 +240,15 @@ new dynamic
 10000 times
 elasped: 0.75499987602234
 
-up server3
+incr server3
 10000 times
 elasped: 0.19000029563904
 
-up server1
+incr server1
 10000 times
 elasped: 0.33699989318848
 
-down server1
+decr server1
 10000 times
 elasped: 0.27300024032593
 
