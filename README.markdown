@@ -2,6 +2,7 @@ Name
 ====
 
 lua-resty-chash - A generic consistent hash implementation for OpenResty/LuaJIT
+
 lua-resty-roundrobin - A generic roundrobin implementation for OpenResty/LuaJIT
 
 Table of Contents
@@ -35,8 +36,6 @@ Description
 ===========
 
 This Lua library can be used with `balancer_by_lua*`.
-
-Both `resty.chash` and `resty.roundrobin` have the same apis.
 
 Synopsis
 ========
@@ -100,6 +99,10 @@ Synopsis
 Methods
 =======
 
+Both `resty.chash` and `resty.roundrobin` have the same apis.
+
+[Back to TOC](#table-of-contents)
+
 new
 ---
 **syntax:** `obj, err = class.new(nodes)`
@@ -133,7 +136,7 @@ reinit
 --------
 **syntax:** `obj:reinit(nodes)`
 
-Reinit the chash obj with the new nodes.
+Reinit the chash obj with the new `nodes`.
 
 [Back to TOC](#table-of-contents)
 
@@ -175,7 +178,7 @@ find
 
 Find an id by the `key`, same key always return the same `id` in the same `obj`.
 
-The second return value `index` is the index in the chash circle of the hash value of the `key`
+The second return value `index` is the index in the chash circle of the hash value of the `key`.
 
 [Back to TOC](#table-of-contents)
 
@@ -183,7 +186,7 @@ next
 --------
 **syntax:** `id, new_index = obj:next(old_index)`
 
-If we may have chance to retry when the first `id`(server) doesn't work well,
+If we have chance to retry when the first `id`(server) doesn't work well,
 then we can use `obj:next` to get the next `id`.
 
 The new `id` may be the same as the old one.
