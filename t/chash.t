@@ -203,3 +203,82 @@ server1, 434
 server2, 534
 --- no_error_log
 [error]
+
+
+
+=== TEST 4: up, decr
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            local resty_chash = require "resty.chash"
+
+            local servers = {
+                ["server1"] = 7,
+                ["server2"] = 2,
+                ["server3"] = 1,
+            }
+
+            local chash = resty_chash:new(servers)
+
+            local num = 100 * 1000
+
+            local res1 = {}
+            for i = 1, num do
+                local id = chash:find(i)
+
+                res1[i] = id
+            end
+
+            chash:incr("server1")
+
+            local res2 = {}
+            for i = 1, num do
+                local id = chash:find(i)
+
+                res2[i] = id
+            end
+
+            local same, diff = 0, 0
+            for i = 1, num do
+                if res1[i] == res2[i] then
+                    same = same + 1
+                else
+                    diff = diff + 1
+                end
+            end
+
+            ngx.say("same: ", same)
+            ngx.say("diff: ", diff)
+
+            chash:decr("server3")
+
+            local res3 = {}
+            for i = 1, num do
+                local id = chash:find(i)
+
+                res3[i] = id
+            end
+
+            local same, diff = 0, 0
+            for i = 1, num do
+                if res3[i] == res2[i] then
+                    same = same + 1
+                else
+                    diff = diff + 1
+                end
+            end
+
+            ngx.say("same: ", same)
+            ngx.say("diff: ", diff)
+        }
+    }
+--- request
+GET /t
+--- response_body
+same: 97606
+diff: 2394
+same: 90255
+diff: 9745
+--- no_error_log
+[error]
