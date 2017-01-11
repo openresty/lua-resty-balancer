@@ -46,6 +46,7 @@ Synopsis
 
     init_by_lua_block {
         local resty_chash = require "resty.chash"
+        local resty_roundrobin = require "resty.roundrobin"
 
         local server_list = {
             ["127.0.0.1:1985"] = 2,
@@ -69,9 +70,12 @@ Synopsis
 
         package.loaded.my_chash_up = chash_up
         package.loaded.my_servers = servers
+
+        local rr_up = resty_chash:new(server_list)
+        package.loaded.my_rr_up = rr_up
     }
 
-    upstream backend {
+    upstream backend_chash {
         server 0.0.0.1;
         balancer_by_lua_block {
             local b = require "ngx.balancer"
@@ -87,9 +91,26 @@ Synopsis
         }
     }
 
+    upstream backend_rr {
+        server 0.0.0.1;
+        balancer_by_lua_block {
+            local b = require "ngx.balancer"
+
+            local rr_up = package.loaded.my_rr_up
+
+            local server = rr_up:find()
+
+            assert(b.set_current_peer(server))
+        }
+    }
+
     server {
-        location /test {
-            proxy_pass http://backend;
+        location /chash {
+            proxy_pass http://backend_chash;
+        }
+
+        location /roundrobin {
+            proxy_pass http://backend_rr;
         }
     }
 ```
