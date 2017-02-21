@@ -71,7 +71,7 @@ Synopsis
         package.loaded.my_chash_up = chash_up
         package.loaded.my_servers = servers
 
-        local rr_up = resty_chash:new(server_list)
+        local rr_up = resty_roundrobin:new(server_list)
         package.loaded.my_rr_up = rr_up
     }
 
