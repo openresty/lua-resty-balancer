@@ -1,0 +1,52 @@
+os: linux
+dist: trusty
+
+sudo: required
+
+addons:
+  apt:
+    packages:
+    - axel
+    - build-essential
+    - cpanminus
+    - libgd-dev
+    - liblist-moreutils-perl
+    - libncurses5-dev
+    - libpcre3-dev
+    - libreadline-dev
+    - libssl-dev
+    - libtest-base-perl
+    - libtest-longstring-perl
+    - libtext-diff-perl
+    - liburi-perl
+    - libwww-perl
+    - perl
+
+cache:
+  directories:
+  - download-cache
+
+env:
+  global:
+  - JOBS=2
+  - OPENRESTY_PREFIX=/usr/local/openresty
+  - OPENRESTY_VER=1.11.2.3
+
+install:
+- if [ ! -f download-cache/openresty-$OPENRESTY_VER.tar.gz ]; then
+    wget -P download-cache https://openresty.org/download/openresty-$OPENRESTY_VER.tar.gz;
+  fi
+- git clone https://github.com/openresty/test-nginx.git ../test-nginx
+
+script:
+- tar xzf download-cache/openresty-$OPENRESTY_VER.tar.gz &&
+    cd openresty-$OPENRESTY_VER
+- ./configure --prefix=$OPENRESTY_PREFIX -j$JOBS
+    > build.log 2>&1 || (cat build.log && exit 1)
+- make -j$JOBS > build.log 2>&1 ||
+    (cat build.log && exit 1)
+- sudo make install > build.log 2>&1 ||
+    (cat build.log && exit 1)
+- cd ..
+- export PATH=$OPENRESTY_PREFIX/nginx/sbin:$PATH
+- make test jobs=$JOBS

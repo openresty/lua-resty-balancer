@@ -60,8 +60,8 @@ __DATA__
 GET /t
 --- response_body
 server2: 14743
-server3: 8182
 server1: 77075
+server3: 8182
 points number: 2080
 --- no_error_log
 [error]

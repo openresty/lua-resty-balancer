@@ -53,18 +53,18 @@ GET /t
 gcd: 2
 id: server1
 id: server1
-id: server2
-id: server1
-id: server2
-id: server3
-id: server1
-id: server1
 id: server1
 id: server2
 id: server1
 id: server2
 id: server3
 id: server1
+id: server1
+id: server1
+id: server2
+id: server1
+id: server2
+id: server3
 --- no_error_log
 [error]
 
@@ -104,8 +104,8 @@ id: server1
 --- request
 GET /t
 --- response_body
-server2: 33334
+server1: 50001
 server3: 16666
-server1: 50000
+server2: 33333
 --- no_error_log
 [error]
