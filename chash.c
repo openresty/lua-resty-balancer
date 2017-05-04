@@ -4,6 +4,10 @@
 #include "chash.h"
 
 
+#ifndef u_char
+#define u_char  unsigned char
+#endif
+
 
 #define crc32_final(crc)                                                  \
     crc ^= 0xffffffff

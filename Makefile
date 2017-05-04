@@ -7,16 +7,10 @@ INSTALL ?= install
 
 .PHONY: all test install bench
 
-OS := $(shell uname)
-
 SRC := chash.c
 OBJ := $(SRC:.c=.o)
 
-ifeq ($(OS), Darwin)
-C_SO_NAME := libchash.dylib
-else
 C_SO_NAME := libchash.so
-endif
 
 CFLAGS := -Wall -O3 -flto -g -DFP_RELAX=0 -DDEBUG
 THE_CFLAGS := $(CFLAGS) -fPIC -MMD -fvisibility=hidden
