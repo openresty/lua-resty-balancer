@@ -10,10 +10,12 @@ INSTALL ?= install
 SRC := chash.c
 OBJ := $(SRC:.c=.o)
 
-C_SO_NAME := libchash.so
+C_SO_NAME := librestychash.so
 
 CFLAGS := -Wall -O3 -flto -g -DFP_RELAX=0 -DDEBUG
 THE_CFLAGS := $(CFLAGS) -fPIC -MMD -fvisibility=hidden
+
+test := t
 
 .PHONY = all test clean install
 
@@ -35,7 +37,7 @@ install:
 	$(INSTALL) $(C_SO_NAME) $(DESTDIR)$(LUA_LIB_DIR)/
 
 test : all
-	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t
+	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r $(test)
 
 bench:
 	$(OPENRESTY_PREFIX)/bin/resty t/bench.lua

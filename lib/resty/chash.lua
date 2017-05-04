@@ -77,9 +77,9 @@ local _M = {}
 local mt = { __index = _M }
 
 
-local clib = load_shared_lib("libchash.so")
+local clib = load_shared_lib("librestychash.so")
 if not clib then
-    error("can not load libchash.so")
+    error("can not load librestychash.so")
 end
 
 local CONSISTENT_POINTS = 160   -- points per server
