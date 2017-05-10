@@ -65,6 +65,7 @@ server3: 8182
 points number: 2080
 --- no_error_log
 [error]
+--- timeout: 30
 
 
 
@@ -169,6 +170,7 @@ ok
 --- error_code: 200
 --- no_error_log
 [error]
+--- timeout: 10
 
 
 
@@ -203,6 +205,7 @@ server1, 434
 server2, 534
 --- no_error_log
 [error]
+--- timeout: 10
 
 
 
@@ -282,3 +285,4 @@ same: 90255
 diff: 9745
 --- no_error_log
 [error]
+--- timeout: 30
