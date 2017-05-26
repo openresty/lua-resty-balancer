@@ -217,7 +217,7 @@ The new `id` may be the same as the old one.
 Installation
 ============
 
-First you need to run `make` to generate the libchash.so.
+First you need to run `make` to generate the librestychash.so.
 Then you need to configure the lua_package_path and lua_package_cpath directive
 to add the path of your lua-resty-chash source tree to ngx_lua's LUA_PATH search
 path, as in
