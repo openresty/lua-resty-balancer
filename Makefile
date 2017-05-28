@@ -12,7 +12,7 @@ OBJ := $(SRC:.c=.o)
 
 C_SO_NAME := librestychash.so
 
-CFLAGS := -Wall -O3 -flto -g -DFP_RELAX=0 -DDEBUG
+CFLAGS := -Wall -O3 -g
 THE_CFLAGS := $(CFLAGS) -fPIC -MMD -fvisibility=hidden
 
 test := t
