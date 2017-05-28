@@ -12,8 +12,14 @@ OBJ := $(SRC:.c=.o)
 
 C_SO_NAME := librestychash.so
 
-CFLAGS := -Wall -O3 -g
-THE_CFLAGS := $(CFLAGS) -fPIC -MMD -fvisibility=hidden
+CFLAGS := -O3 -g -Wall -fpic
+
+LDFLAGS := -shared
+# on Mac OS X, one should set instead:
+# LDFLAGS := -bundle -undefined dynamic_lookup
+
+MY_CFLAGS := $(CFLAGS) -DBUILDING_SO
+MY_LDFLAGS := $(LDFLAGS) -fvisibility=hidden
 
 test := t
 
@@ -22,10 +28,10 @@ test := t
 all : $(C_SO_NAME)
 
 ${OBJ} : %.o : %.c
-	$(CC) $(THE_CFLAGS) -DBUILDING_SO -c $<
+	$(CC) $(MY_CFLAGS) -c $<
 
 ${C_SO_NAME} : ${OBJ}
-	$(CC) $(THE_CFLAGS) -DBUILDING_SO $^ -shared -o $@
+	$(CC) $(MY_LDFLAGS) $^ -o $@
 
 #export TEST_NGINX_NO_CLEAN=1
 
