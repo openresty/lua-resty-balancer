@@ -35,22 +35,25 @@ local function get_gcd(nodes)
         return error("empty nodes")
     end
 
+    local only_key = first_id
     local gcd = max_weight
     for id, weight in next, nodes, first_id do
+        only_key = nil
         gcd = _gcd(gcd, weight)
         max_weight = weight > max_weight and weight or max_weight
     end
 
-    return gcd, max_weight
+    return only_key, gcd, max_weight
 end
 
 
 function _M.new(_, nodes)
     local newnodes = copy(nodes)
-    local gcd, max_weight = get_gcd(newnodes)
+    local only_key, gcd, max_weight = get_gcd(newnodes)
 
     local self = {
         nodes = newnodes,  -- it's safer to copy one
+        only_key = only_key,
         max_weight = max_weight,
         gcd = gcd,
         cw = max_weight,
@@ -62,7 +65,7 @@ end
 
 function _M.reinit(self, nodes)
     local newnodes = copy(nodes)
-    self.gcd, self.max_weight = get_gcd(newnodes)
+    self.only_key, self.gcd, self.max_weight = get_gcd(newnodes)
 
     self.nodes = newnodes
     self.last_id = nil
@@ -75,7 +78,7 @@ local function _delete(self, id)
 
     nodes[id] = nil
 
-    self.gcd, self.max_weight = get_gcd(nodes)
+    self.only_key, self.gcd, self.max_weight = get_gcd(nodes)
 
     if id == self.last_id then
         self.last_id = nil
@@ -103,7 +106,7 @@ local function _decr(self, id, weight)
 
     nodes[id] = old_weight - weight
 
-    self.gcd, self.max_weight = get_gcd(nodes)
+    self.only_key, self.gcd, self.max_weight = get_gcd(nodes)
 
     if self.cw > self.max_weight then
         self.cw = self.max_weight
@@ -118,7 +121,7 @@ local function _incr(self, id, weight)
 
     nodes[id] = (nodes[id] or 0) + weight
 
-    self.gcd, self.max_weight = get_gcd(nodes)
+    self.only_key, self.gcd, self.max_weight = get_gcd(nodes)
 end
 _M.incr = _incr
 
@@ -141,6 +144,11 @@ end
 
 
 local function find(self)
+    local only_key = self.only_key
+    if only_key then
+        return only_key
+    end
+
     local nodes = self.nodes
     local last_id, cw, weight = self.last_id, self.cw
 
