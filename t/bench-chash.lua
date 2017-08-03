@@ -1,9 +1,14 @@
+require "resty.core"
+require "jit.opt".start("minstitch=2", "maxtrace=4000",
+                        "maxrecord=8000", "sizemcode=64",
+                        "maxmcode=4000", "maxirconst=1000")
 
--- XX my local path
-local my_local_dir = "/home/dou/work/git/doujiang/lua-resty-balancer/"
+local local_dir = arg[1]
 
-package.path = my_local_dir .. "lib/?.lua;" .. package.path
-package.cpath = my_local_dir .. "?.so;" .. package.cpath
+-- ngx.say("local dir: ", local_dir)
+
+package.path = local_dir .. "/lib/?.lua;" .. package.path
+package.cpath = local_dir .. "/?.so;" .. package.cpath
 
 local base_time
 

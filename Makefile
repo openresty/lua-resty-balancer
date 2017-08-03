@@ -46,4 +46,5 @@ test : all
 	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r $(test)
 
 bench:
-	$(OPENRESTY_PREFIX)/bin/resty t/bench.lua
+	$(OPENRESTY_PREFIX)/bin/resty t/bench-chash.lua `pwd`
+	$(OPENRESTY_PREFIX)/bin/resty t/bench-roundrobin.lua `pwd`
