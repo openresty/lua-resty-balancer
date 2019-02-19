@@ -138,7 +138,7 @@ end
 
 
 function _M.reinit(self, nodes)
-    self.ids, self.points, self.npoints, self.newnodes = _precompute(nodes)
+    self.ids, self.points, self.npoints, self.nodes = _precompute(nodes)
     self.size = self.npoints
 end
 
