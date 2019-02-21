@@ -286,3 +286,58 @@ diff: 9745
 --- no_error_log
 [error]
 --- timeout: 30
+
+
+
+=== TEST 5: reinit
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            local resty_chash = require "resty.chash"
+
+            local servers = {
+                ["server1"] = 10,
+                ["server2"] = 2,
+                ["server3"] = 1,
+            }
+
+            local chash = resty_chash:new(servers)
+
+            for id, weight in pairs(chash.nodes) do
+                ngx.say(id, ": ", weight)
+            end
+            ngx.say("points number: ", chash.npoints)
+            ngx.say("size: ", chash.size)
+
+            ngx.say("reinit")
+
+            local new_servers = {
+                ["server4"] = 1,
+                ["server5"] = 2,
+            }
+            chash:reinit(new_servers)
+
+            for id, weight in pairs(chash.nodes) do
+                ngx.say(id, ": ", weight)
+            end
+            ngx.say("points number: ", chash.npoints)
+            ngx.say("size: ", chash.size)
+        }
+    }
+--- request
+GET /t
+--- response_body
+server1: 10
+server2: 2
+server3: 1
+points number: 2080
+size: 2080
+reinit
+server4: 1
+server5: 2
+points number: 480
+size: 480
+--- no_error_log
+[error]
+--- timeout: 30
