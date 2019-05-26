@@ -109,3 +109,76 @@ server3: 16666
 server2: 33333
 --- no_error_log
 [error]
+
+
+
+=== TEST 3: new with random start
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(75098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = 1,
+                ["server2"] = 1,
+                ["server3"] = 1,
+            }
+
+            local rr = roundrobin:new(servers, true)
+            local id = rr:find()
+            ngx.say(id)
+        }
+    }
+--- request
+GET /t
+--- response_body
+server3
+--- no_error_log
+[error]
+
+
+
+=== TEST 4: reinit with random start
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(75098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = 1,
+                ["server2"] = 1,
+                ["server3"] = 1,
+            }
+
+            local rr = roundrobin:new(servers, true)
+            local id = rr:find()
+            ngx.say(id)
+
+            math.randomseed(99111)
+
+            local new_servers = {
+                ["server1"] = 1,
+                ["server2"] = 1,
+                ["server3"] = 1,
+                ["server4"] = 1,
+                ["server5"] = 1,
+            }
+
+            rr:reinit(new_servers)
+            id = rr:find()
+            ngx.say(id)
+        }
+    }
+--- request
+GET /t
+--- response_body
+server3
+server5
+--- no_error_log
+[error]
