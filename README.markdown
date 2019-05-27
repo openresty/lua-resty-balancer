@@ -98,6 +98,7 @@ Synopsis
 
             local rr_up = package.loaded.my_rr_up
 
+            -- Note that Round Robin picks the first server randomly
             local server = rr_up:find()
 
             assert(b.set_current_peer(server))
@@ -126,7 +127,7 @@ Both `resty.chash` and `resty.roundrobin` have the same apis.
 
 new
 ---
-**syntax:** `obj, err = class.new(nodes, random_start?)`
+**syntax:** `obj, err = class.new(nodes)`
 
 Instantiates an object of this class. The `class` value is returned by the call `require "resty.chash"`.
 
@@ -134,9 +135,6 @@ The `id` should be `table.concat({host, string.char(0), port})` like the nginx c
 when we need to keep consistency with nginx chash.
 
 The `id` can be any string value when we do not need to keep consistency with nginx chash.
-
-`random_start` can optionally be set when initializing `resty.roundrobin`. If it is set then
-the algorithm will pick first node uniformly at random instead of starting with the first one.
 
 ```lua
 local nodes = {

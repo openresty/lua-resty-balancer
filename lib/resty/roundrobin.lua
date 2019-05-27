@@ -48,30 +48,26 @@ local function get_gcd(nodes)
 end
 
 local function get_random_node_id(nodes)
-  local count = 0
-  for _, _ in pairs(nodes) do
-    count = count + 1
-  end
+    local count = 0
+    for _, _ in pairs(nodes) do
+        count = count + 1
+    end
 
-  local id = nil
-  local random_index = math_random(count)
+    local id = nil
+    local random_index = math_random(count)
 
-  for _ = 1, random_index do
-    id = next(nodes, id)
-  end
+    for _ = 1, random_index do
+        id = next(nodes, id)
+    end
 
-  return id
+    return id
 end
 
 
-function _M.new(_, nodes, random_start)
+function _M.new(_, nodes)
     local newnodes = copy(nodes)
     local only_key, gcd, max_weight = get_gcd(newnodes)
-    local last_id = nil
-
-    if random_start then
-      last_id = get_random_node_id(nodes)
-    end
+    local last_id = get_random_node_id(nodes)
 
     local self = {
         nodes = newnodes,  -- it's safer to copy one
@@ -80,7 +76,6 @@ function _M.new(_, nodes, random_start)
         gcd = gcd,
         cw = max_weight,
         last_id = last_id,
-        random_start = random_start,
     }
     return setmetatable(self, mt)
 end
@@ -91,12 +86,8 @@ function _M.reinit(self, nodes)
     self.only_key, self.gcd, self.max_weight = get_gcd(newnodes)
 
     self.nodes = newnodes
-    self.last_id = nil
+    self.last_id = get_random_node_id(nodes)
     self.cw = self.max_weight
-
-    if self.random_start then
-      self.last_id = get_random_node_id(nodes)
-    end
 end
 
 
