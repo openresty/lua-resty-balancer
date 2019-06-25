@@ -28,6 +28,8 @@ __DATA__
 --- config
     location /t {
         content_by_lua_block {
+            math.randomseed(75098)
+
             local roundrobin = require "resty.roundrobin"
 
             local servers = {
@@ -53,7 +55,6 @@ GET /t
 gcd: 2
 id: server1
 id: server1
-id: server1
 id: server2
 id: server1
 id: server2
@@ -65,6 +66,7 @@ id: server2
 id: server1
 id: server2
 id: server3
+id: server1
 --- no_error_log
 [error]
 
@@ -75,6 +77,8 @@ id: server3
 --- config
     location /t {
         content_by_lua_block {
+            math.randomseed(75098)
+
             local roundrobin = require "resty.roundrobin"
 
             local servers = {
@@ -104,8 +108,54 @@ id: server3
 --- request
 GET /t
 --- response_body
-server1: 50001
+server1: 50000
 server3: 16666
-server2: 33333
+server2: 33334
+--- no_error_log
+[error]
+
+
+
+=== TEST 3: random start
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(9975098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = 1,
+                ["server2"] = 1,
+                ["server3"] = 1,
+                ["server4"] = 1,
+            }
+
+            local rr = roundrobin:new(servers, true)
+            local id = rr:find()
+            ngx.say(id)
+
+            math.randomseed(11175098)
+
+            local new_servers = {
+                ["server1"] = 1,
+                ["server2"] = 1,
+                ["server3"] = 1,
+                ["server4"] = 1,
+                ["server5"] = 1,
+                ["server6"] = 1,
+            }
+
+            rr:reinit(new_servers)
+            id = rr:find()
+            ngx.say(id)
+        }
+    }
+--- request
+GET /t
+--- response_body
+server2
+server5
 --- no_error_log
 [error]

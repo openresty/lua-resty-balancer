@@ -98,6 +98,7 @@ Synopsis
 
             local rr_up = package.loaded.my_rr_up
 
+            -- Note that Round Robin picks the first server randomly
             local server = rr_up:find()
 
             assert(b.set_current_peer(server))
