@@ -9,9 +9,17 @@ local math_random = math.random
 local _M = {}
 local mt = { __index = _M }
 
+local new_tab
+do
+    local ok
+    ok, new_tab = pcall(require, "table.new")
+    if not ok or type(new_tab) ~= "function" then
+        new_tab = function (narr, nrec) return {} end
+    end
+end
 
-local function copy(nodes)
-    local newnodes = {}
+local function _copy(nodes)
+    local newnodes = new_tab(0, 5)
     for id, weight in pairs(nodes) do
         newnodes[id] = weight
     end
@@ -19,6 +27,23 @@ local function copy(nodes)
     return newnodes
 end
 
+local function _copy(nodes)
+    local newnodes = new_tab(0, 5)
+    for id, weight in pairs(nodes) do
+        newnodes[id] = weight
+    end
+
+    return newnodes
+end
+
+local copy
+do
+    local ok
+    ok, copy = pcall(require, "table.clone")
+    if not ok or type(copy) ~= "function" then
+        copy = _copy
+    end
+end
 
 local _gcd
 _gcd = function (a, b)

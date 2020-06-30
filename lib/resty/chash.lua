@@ -38,12 +38,32 @@ void chash_point_delete(chash_point_t *old_points, uint32_t old_length,
     uint32_t id);
 ]]
 
-
-local ok, new_tab = pcall(require, "table.new")
-if not ok or type(new_tab) ~= "function" then
-    new_tab = function (narr, nrec) return {} end
+local new_tab
+do
+    local ok
+    ok, new_tab = pcall(require, "table.new")
+    if not ok or type(new_tab) ~= "function" then
+        new_tab = function (narr, nrec) return {} end
+    end
 end
 
+local function _copy(nodes)
+    local newnodes = new_tab(0, 5)
+    for id, weight in pairs(nodes) do
+        newnodes[id] = weight
+    end
+
+    return newnodes
+end
+
+local copy
+do
+    local ok
+    ok, copy = pcall(require, "table.clone")
+    if not ok or type(copy) ~= "function" then
+        copy = _copy
+    end
+end
 
 --
 -- Find shared object file package.cpath, obviating the need of setting
@@ -99,6 +119,7 @@ local function _precompute(nodes)
     for id, weight in pairs(nodes) do
         newnodes[id] = weight
     end
+    local newnodes = copy(nodes)
 
     local ids = new_tab(n, 0)
     local npoints = total_weight * CONSISTENT_POINTS
