@@ -304,9 +304,17 @@ diff: 9745
 
             local chash = resty_chash:new(servers)
 
+            local success = true
+            local count = 0
             for id, weight in pairs(chash.nodes) do
-                ngx.say(id, ": ", weight)
+                count = count + 1
+                if servers[id] ~= weight then
+                    success = false
+                end
             end
+            ngx.say("count: ", count)
+            ngx.say("success: ",success)
+
             ngx.say("points number: ", chash.npoints)
             ngx.say("size: ", chash.size)
 
@@ -318,9 +326,16 @@ diff: 9745
             }
             chash:reinit(new_servers)
 
+            count = 0
             for id, weight in pairs(chash.nodes) do
-                ngx.say(id, ": ", weight)
+                count = count + 1
+                if new_servers[id] ~= weight then
+                    success = false
+                end
             end
+            ngx.say("count: ", count)
+            ngx.say("success: ",success)
+
             ngx.say("points number: ", chash.npoints)
             ngx.say("size: ", chash.size)
         }
@@ -328,14 +343,13 @@ diff: 9745
 --- request
 GET /t
 --- response_body
-server1: 10
-server2: 2
-server3: 1
+count: 3
+success: true
 points number: 2080
 size: 2080
 reinit
-server4: 1
-server5: 2
+count: 2
+success: true
 points number: 480
 size: 480
 --- no_error_log

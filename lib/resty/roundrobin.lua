@@ -18,30 +18,19 @@ do
     end
 end
 
-local function _copy(nodes)
-    local newnodes = new_tab(0, 5)
-    for id, weight in pairs(nodes) do
-        newnodes[id] = weight
-    end
-
-    return newnodes
-end
-
-local function _copy(nodes)
-    local newnodes = new_tab(0, 5)
-    for id, weight in pairs(nodes) do
-        newnodes[id] = weight
-    end
-
-    return newnodes
-end
-
 local copy
 do
     local ok
     ok, copy = pcall(require, "table.clone")
     if not ok or type(copy) ~= "function" then
-        copy = _copy
+        copy = function(nodes)
+            local newnodes = new_tab(0, 5)
+            for id, weight in pairs(nodes) do
+                newnodes[id] = weight
+            end
+
+            return newnodes
+        end
     end
 end
 

@@ -44,29 +44,19 @@ __DATA__
 
             for i = 1, 14 do
                 local id = rr:find()
-
-                ngx.say("id: ", id)
+                if type(id) ~= "string" or not servers[id] then
+                    return ngx.say("fail")
+                end
             end
+
+            ngx.say("success")
         }
     }
 --- request
 GET /t
 --- response_body
 gcd: 2
-id: server1
-id: server1
-id: server2
-id: server1
-id: server2
-id: server3
-id: server1
-id: server1
-id: server1
-id: server2
-id: server1
-id: server2
-id: server3
-id: server1
+success
 --- no_error_log
 [error]
 
@@ -83,8 +73,8 @@ id: server1
 
             local servers = {
                 ["server1"] = 6,
-                ["server2"] = 4,
-                ["server3"] = 2,
+                ["server2"] = 3,
+                ["server3"] = 1,
             }
 
             local rr = roundrobin:new(servers)
@@ -100,17 +90,26 @@ id: server1
                 end
             end
 
+            local keys = {}
             for id, num in pairs(res) do
-                ngx.say(id, ": ", num)
+                keys[#keys + 1] = id
             end
+
+            if #keys ~= 3 then
+                ngx.exit(400)
+            end
+
+            ngx.say("server1: ", res['server1'])
+            ngx.say("server2: ", res['server2'])
+            ngx.say("server3: ", res['server3'])
         }
     }
 --- request
 GET /t
 --- response_body
-server1: 50000
-server3: 16666
-server2: 33334
+server1: 60000
+server2: 30000
+server3: 10000
 --- no_error_log
 [error]
 
@@ -134,28 +133,16 @@ server2: 33334
 
             local rr = roundrobin:new(servers, true)
             local id = rr:find()
-            ngx.say(id)
 
-            math.randomseed(11175098)
-
-            local new_servers = {
-                ["server1"] = 1,
-                ["server2"] = 1,
-                ["server3"] = 1,
-                ["server4"] = 1,
-                ["server5"] = 1,
-                ["server6"] = 1,
-            }
-
-            rr:reinit(new_servers)
-            id = rr:find()
-            ngx.say(id)
+            local rr2 = roundrobin:new(servers, true)
+            local id2 = rr2:find()
+            ngx.log(ngx.INFO, "id: ", id, " id2: ", id2)
+            ngx.say(id == id2)
         }
     }
 --- request
 GET /t
 --- response_body
-server2
-server5
+false
 --- no_error_log
 [error]
