@@ -5,34 +5,13 @@ local tonumber = tonumber
 local setmetatable = setmetatable
 local math_random = math.random
 
+local utils = require "resty.balancer.utils"
+
+local new_tab = utils.new_tab
+local copy = utils.copy
 
 local _M = {}
 local mt = { __index = _M }
-
-local new_tab
-do
-    local ok
-    ok, new_tab = pcall(require, "table.new")
-    if not ok or type(new_tab) ~= "function" then
-        new_tab = function (narr, nrec) return {} end
-    end
-end
-
-local copy
-do
-    local ok
-    ok, copy = pcall(require, "table.clone")
-    if not ok or type(copy) ~= "function" then
-        copy = function(nodes)
-            local newnodes = new_tab(0, 5)
-            for id, weight in pairs(nodes) do
-                newnodes[id] = weight
-            end
-
-            return newnodes
-        end
-    end
-end
 
 local _gcd
 _gcd = function (a, b)
