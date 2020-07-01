@@ -44,7 +44,9 @@ clean:; rm -f *.o *.so a.out *.d
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(LUA_LIB_DIR)/resty
+	$(INSTALL) -d $(DESTDIR)$(LUA_LIB_DIR)/resty/balancer
 	$(INSTALL) lib/resty/*.lua $(DESTDIR)$(LUA_LIB_DIR)/resty
+	$(INSTALL) lib/resty/balancer/*.lua $(DESTDIR)$(LUA_LIB_DIR)/resty/balancer
 	$(INSTALL) $(C_SO_NAME) $(DESTDIR)$(LUA_LIB_DIR)/
 
 test : all
