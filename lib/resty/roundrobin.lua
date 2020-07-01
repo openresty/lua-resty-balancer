@@ -7,8 +7,9 @@ local math_random = math.random
 
 local utils = require "resty.balancer.utils"
 
-local new_tab = utils.new_tab
 local copy = utils.copy
+local nkeys = utils.nkeys
+local new_tab = utils.new_tab
 
 local _M = {}
 local mt = { __index = _M }
@@ -41,10 +42,7 @@ local function get_gcd(nodes)
 end
 
 local function get_random_node_id(nodes)
-    local count = 0
-    for _, _ in pairs(nodes) do
-        count = count + 1
-    end
+    local count = nkeys(nodes)
 
     local id = nil
     local random_index = math_random(count)
