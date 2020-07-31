@@ -5,6 +5,10 @@
 local bit = require "bit"
 local ffi = require 'ffi'
 
+local utils = require "resty.balancer.utils"
+
+local new_tab = utils.new_tab
+local copy = utils.copy
 
 local ffi_new = ffi.new
 local C = ffi.C
@@ -37,13 +41,6 @@ void chash_point_reduce(chash_point_t *old_points, uint32_t old_length,
 void chash_point_delete(chash_point_t *old_points, uint32_t old_length,
     uint32_t id);
 ]]
-
-
-local ok, new_tab = pcall(require, "table.new")
-if not ok or type(new_tab) ~= "function" then
-    new_tab = function (narr, nrec) return {} end
-end
-
 
 --
 -- Find shared object file package.cpath, obviating the need of setting
@@ -95,10 +92,7 @@ local function _precompute(nodes)
         total_weight = total_weight + weight
     end
 
-    local newnodes = new_tab(0, n)
-    for id, weight in pairs(nodes) do
-        newnodes[id] = weight
-    end
+    local newnodes = copy(nodes)
 
     local ids = new_tab(n, 0)
     local npoints = total_weight * CONSISTENT_POINTS
