@@ -14,17 +14,6 @@ local new_tab = utils.new_tab
 local _M = {}
 local mt = { __index = _M }
 
-
-local function copy(nodes)
-    local newnodes = {}
-    for id, weight in pairs(nodes) do
-        newnodes[id] = weight
-    end
-
-    return newnodes
-end
-
-
 local _gcd
 _gcd = function (a, b)
     if b == 0 then
