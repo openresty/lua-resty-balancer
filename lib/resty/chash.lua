@@ -58,6 +58,12 @@ local function load_shared_lib(so_name)
 
     local cpath = package.cpath
 
+    local postfix = ".so"
+    if ffi.os == "OSX" then
+        postfix = ".dylib"
+    end
+    so_name = so_name .. postfix
+
     for k, _ in string_gmatch(cpath, "[^;]+") do
         local fpath = string_match(k, "(.*/)")
         fpath = fpath .. so_name
@@ -77,9 +83,9 @@ local _M = {}
 local mt = { __index = _M }
 
 
-local clib = load_shared_lib("librestychash.so")
+local clib = load_shared_lib("librestychash")
 if not clib then
-    error("can not load librestychash.so")
+    error("can not load librestychash")
 end
 
 local CONSISTENT_POINTS = 160   -- points per server
