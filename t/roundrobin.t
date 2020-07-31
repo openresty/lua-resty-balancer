@@ -143,8 +143,6 @@ server3: 10000
 --- request
 GET /t
 --- response_body
-server2
-server5
 false
 --- no_error_log
 [error]

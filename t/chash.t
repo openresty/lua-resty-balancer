@@ -330,7 +330,7 @@ diff: 9745
             count = 0
             for id, weight in pairs(chash.nodes) do
                    count = count + 1
-                if servers[id] ~= weight then
+                if new_servers[id] ~= weight then
                     success = false
                 end
             end
