@@ -18,6 +18,11 @@ LDFLAGS := -shared
 # on Mac OS X, one should set instead:
 # LDFLAGS := -bundle -undefined dynamic_lookup
 
+ifeq ($(shell uname),Darwin)
+	LDFLAGS := -bundle -undefined dynamic_lookup
+	C_SO_NAME := librestychash.dylib
+endif
+
 MY_CFLAGS := $(CFLAGS) -DBUILDING_SO
 MY_LDFLAGS := $(LDFLAGS) -fvisibility=hidden
 
