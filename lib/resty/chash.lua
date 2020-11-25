@@ -20,7 +20,7 @@ local pairs = pairs
 local tostring = tostring
 local tonumber = tonumber
 local bxor = bit.bxor
-local bit_rshift = bit.rshift
+local bit_lshift = bit.lshift
 
 
 ffi.cdef[[
@@ -116,8 +116,8 @@ local function _precompute(nodes)
 
         local bash_hash = ngx_murmur_hash2(ffi_cast('uint8_t *', id), #id)
 
-        if num >= bit_rshift(1, 14) then
-            num = bit_rshift(1, 14)
+        if num >= bit_lshift(1, 14) then
+            num = bit_lshift(1, 14)
         end
 
         index = index + 1
