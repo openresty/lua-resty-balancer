@@ -11,6 +11,7 @@ local new_tab = utils.new_tab
 local copy = utils.copy
 
 local ffi_new = ffi.new
+local ffi_cast = ffi.cast
 local C = ffi.C
 local crc32 = ngx.crc32_short
 local setmetatable = setmetatable
@@ -19,10 +20,12 @@ local pairs = pairs
 local tostring = tostring
 local tonumber = tonumber
 local bxor = bit.bxor
+local bit_rshift = bit.rshift
 
 
 ffi.cdef[[
 typedef unsigned int uint32_t;
+typedef unsigned char u_char;
 
 typedef struct {
     uint32_t hash;
@@ -40,6 +43,8 @@ void chash_point_reduce(chash_point_t *old_points, uint32_t old_length,
     uint32_t base_hash, uint32_t from, uint32_t num, uint32_t id);
 void chash_point_delete(chash_point_t *old_points, uint32_t old_length,
     uint32_t id);
+uint32_t chash_point_find(chash_point_t *arr, uint32_t num, uint32_t hash);
+uint32_t ngx_murmur_hash2(u_char *data, size_t len);
 ]]
 
 --
@@ -107,7 +112,13 @@ local function _precompute(nodes)
     local start, index = 0, 0
     for id, weight in pairs(nodes) do
         local num = weight * CONSISTENT_POINTS
-        local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
+        -- local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
+
+        local bash_hash = ngx_murmur_hash2(ffi_cast('uint8_t *', id), #id)
+
+        if num >= bit_rshift(1, 14) then
+            num = bit_rshift(1, 14)
+        end
 
         index = index + 1
         ids[index] = id
@@ -290,9 +301,16 @@ end
 
 
 function _M.find(self, key)
-    local hash = crc32(tostring(key))
+    -- local hash = crc32(tostring(key))
+    -- local id, index = _find_id(self.points, self.npoints, hash)
+    -- return self.ids[id], index
 
-    local id, index = _find_id(self.points, self.npoints, hash)
+    -- get hash
+    local hash = C.ngx_murmur_hash2(ffi_cast('uint8_t *', key), #key)
+    -- get virtual node
+    local index = clib.chash_point_find(self.points, self.npoints, hash)
+    -- get server
+    local id = self.points[index].id
 
     return self.ids[id], index
 end

@@ -81,6 +81,50 @@ static uint32_t crc32_table256[] = {
 };
 
 
+uint32_t
+murmur_hash2(u_char *data, size_t len)
+{
+    uint32_t  h, k;
+
+    h = 0 ^ len;
+
+    while (len >= 4) {
+        k  = data[0];
+        k |= data[1] << 8;
+        k |= data[2] << 16;
+        k |= data[3] << 24;
+
+        k *= 0x5bd1e995;
+        k ^= k >> 24;
+        k *= 0x5bd1e995;
+
+        h *= 0x5bd1e995;
+        h ^= k;
+
+        data += 4;
+        len -= 4;
+    }
+
+    switch (len) {
+    case 3:
+        h ^= data[2] << 16;
+        /* fall through */
+    case 2:
+        h ^= data[1] << 8;
+        /* fall through */
+    case 1:
+        h ^= data[0];
+        h *= 0x5bd1e995;
+    }
+
+    h ^= h >> 13;
+    h *= 0x5bd1e995;
+    h ^= h >> 15;
+
+    return h;
+}
+
+
 static inline void
 crc32_update(uint32_t *crc, u_char *p, size_t len)
 {
@@ -325,4 +369,30 @@ chash_point_delete(chash_point_t *old_points, uint32_t old_length, uint32_t id)
         }
         j++;
     }
+}
+
+
+uint32_t
+chash_point_find(chash_point_t *arr, uint32_t num, uint32_t hash)
+{
+    chash_point_t *node;
+    int i, j, k;
+
+    node = &arr[0];
+
+    i = 0;
+    j = num;
+    while(i < j) {
+        k = (i + j) / 2;
+
+        if (hash > node[k].hash) {
+            i = k + 1;
+        } else if(hash < node[k].hash) {
+            j = k;
+        } else {
+            return k;
+        }
+    }
+
+    return i;
 }
