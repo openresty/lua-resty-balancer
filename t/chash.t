@@ -41,7 +41,6 @@ __DATA__
             local res = {}
             for i = 1, 100 * 1000 do
                 local id = chash:find(i)
-
                 if res[id] then
                     res[id] = res[id] + 1
                 else
@@ -49,8 +48,9 @@ __DATA__
                 end
             end
 
-            for id, num in pairs(res) do
-                ngx.say(id, ": ", num)
+            for i=1, 3 do
+                local id = "server"..i
+                ngx.say(id..": ", res[id])
             end
 
             ngx.say("points number: ", chash.npoints)
@@ -59,8 +59,8 @@ __DATA__
 --- request
 GET /t
 --- response_body
-server2: 14743
 server1: 77075
+server2: 14743
 server3: 8182
 points number: 2080
 --- no_error_log
