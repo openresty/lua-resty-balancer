@@ -11,27 +11,10 @@ do
         new_tab = function (narr, nrec) return {} end
     end
 end
-
 _M.new_tab = new_tab
 
-local copy
-do
-    local ok
-    ok, copy = pcall(require, "table.clone")
-    if not ok or type(copy) ~= "function" then
-        copy = function(nodes)
-            local newnodes = new_tab(0, 0)
-            for id, weight in pairs(nodes) do
-                newnodes[id] = weight
-            end
 
-            return newnodes
-        end
-    end
-end
-_M.copy = copy
-
-local nkeys
+local nkeys, jit_nkeys
 do
     local ok
     ok, nkeys = pcall(require, "table.nkeys")
@@ -43,9 +26,22 @@ do
             end
             return count
         end
+
+    else
+        jit_nkeys = nkeys
     end
 end
-
 _M.nkeys = nkeys
+
+
+function _M.copy(nodes)
+    local newnodes = new_tab(0, jit_nkeys and jit_nkeys(nodes) or 4)
+    for id, weight in pairs(nodes) do
+        newnodes[id] = tonumber(weight)
+    end
+
+    return newnodes
+end
+
 
 return _M
