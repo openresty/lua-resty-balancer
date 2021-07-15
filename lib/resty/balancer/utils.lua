@@ -14,7 +14,7 @@ end
 _M.new_tab = new_tab
 
 
-local nkeys, jit_nkeys
+local nkeys, tab_nkeys
 do
     local ok
     ok, nkeys = pcall(require, "table.nkeys")
@@ -28,14 +28,14 @@ do
         end
 
     else
-        jit_nkeys = nkeys
+        tab_nkeys = nkeys
     end
 end
 _M.nkeys = nkeys
 
 
 function _M.copy(nodes)
-    local newnodes = new_tab(0, jit_nkeys and jit_nkeys(nodes) or 4)
+    local newnodes = new_tab(0, tab_nkeys and tab_nkeys(nodes) or 4)
     for id, weight in pairs(nodes) do
         newnodes[id] = tonumber(weight)
     end
