@@ -146,3 +146,69 @@ GET /t
 false
 --- no_error_log
 [error]
+
+
+
+=== TEST 4: weight is "0"
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(9975098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = "0",
+                ["server2"] = "1",
+                ["server3"] = "0",
+                ["server4"] = "0",
+            }
+
+            local rr = roundrobin:new(servers, true)
+            local id = rr:find()
+
+            ngx.say("id: ", id)
+        }
+    }
+--- request
+GET /t
+--- response_body
+id: server2
+--- no_error_log
+[error]
+
+
+
+=== TEST 5: all weights are 0, behavior like weights are 1.
+It's not recommends to use 0, this test just make sure it won't be worse, like crash.
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(9975098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = 0,
+                ["server2"] = 0,
+                ["server3"] = 0,
+                ["server4"] = 0,
+            }
+
+            local rr = roundrobin:new(servers, true)
+
+            for i = 1, 4 do
+                local id = rr:find()
+            end
+
+            ngx.say("ok")
+        }
+    }
+--- request
+GET /t
+--- response_body
+ok
+--- no_error_log
+[error]
