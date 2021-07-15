@@ -201,16 +201,14 @@ It's not recommends to use 0, this test just make sure it won't be worse, like c
 
             for i = 1, 4 do
                 local id = rr:find()
-                ngx.say("id: ", id)
             end
+
+            ngx.say("ok")
         }
     }
 --- request
 GET /t
 --- response_body
-id: server3
-id: server2
-id: server1
-id: server4
+ok
 --- no_error_log
 [error]
