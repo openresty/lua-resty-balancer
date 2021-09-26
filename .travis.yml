@@ -21,6 +21,7 @@ addons:
     - liburi-perl
     - libwww-perl
     - perl
+    - valgrind
 
 cache:
   directories:
@@ -28,9 +29,12 @@ cache:
 
 env:
   global:
-  - JOBS=2
-  - OPENRESTY_PREFIX=/usr/local/openresty
-  - OPENRESTY_VER=1.11.2.3
+    - JOBS=2
+    - OPENRESTY_PREFIX=/usr/local/openresty
+    - OPENRESTY_VER=1.11.2.3
+  jobs:
+    - TEST_NGINX_USE_VALGRIND=0
+    - TEST_NGINX_USE_VALGRIND=1
 
 install:
 - if [ ! -f download-cache/openresty-$OPENRESTY_VER.tar.gz ]; then
@@ -39,9 +43,10 @@ install:
 - git clone https://github.com/openresty/test-nginx.git ../test-nginx
 
 script:
+- if [ TEST_NGINX_USE_VALGRIND = 1 ]; then export luajit_xcflags='-DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC'; fi
 - tar xzf download-cache/openresty-$OPENRESTY_VER.tar.gz &&
     cd openresty-$OPENRESTY_VER
-- ./configure --prefix=$OPENRESTY_PREFIX -j$JOBS
+- ./configure --prefix=$OPENRESTY_PREFIX --with-luajit-xcflags="$luajit_xcflags" -j$JOBS
     > build.log 2>&1 || (cat build.log && exit 1)
 - make -j$JOBS > build.log 2>&1 ||
     (cat build.log && exit 1)
