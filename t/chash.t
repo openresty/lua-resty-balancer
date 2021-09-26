@@ -359,7 +359,7 @@ size: 480
 
 
 
-=== TEST 6: randon key
+=== TEST 6: random key fuzzer
 --- http_config eval: $::HttpConfig
 --- config
     location /t {

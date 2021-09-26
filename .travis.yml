@@ -31,7 +31,7 @@ env:
   global:
     - JOBS=2
     - OPENRESTY_PREFIX=/usr/local/openresty
-    - OPENRESTY_VER=1.11.2.3
+    - OPENRESTY_VER=1.19.9.1
   jobs:
     - TEST_NGINX_USE_VALGRIND=0
     - TEST_NGINX_USE_VALGRIND=1
