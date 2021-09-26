@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
+
 #include "chash.h"
 
 
@@ -164,7 +166,9 @@ chash_point_sort(chash_point_t arr[], uint32_t n)
 
     for (i = 0; i < n; i++) {
         node = &arr[i];
-        index = node->hash / step; // can not bigger than m
+        index = node->hash / step;
+
+        assert(index < m); // index must less than m
 
         for (end = index; end >= 0; end--) {
             if (points[end].id == 0) {
@@ -188,7 +192,10 @@ chash_point_sort(chash_point_t arr[], uint32_t n)
 
                 /* left shift after end when node->hash is bigger than them */
                 /* only end == index can match this */
-                while (points[end + 1].id != 0 && points[end + 1].hash < node->hash) {
+                while (end + 1 < m
+                       && points[end + 1].id != 0
+                       && points[end + 1].hash < node->hash)
+                {
                     points[end].hash = points[end + 1].hash;
                     points[end].id = points[end + 1].id;
                     end += 1;
@@ -223,6 +230,8 @@ chash_point_sort(chash_point_t arr[], uint32_t n)
         }
 
 insert:
+        assert(end < m && end >= 0);
+
         points[end].id = node->id;
         points[end].hash = node->hash;
     }

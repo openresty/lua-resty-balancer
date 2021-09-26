@@ -21,6 +21,7 @@ addons:
     - liburi-perl
     - libwww-perl
     - perl
+    - valgrind
 
 cache:
   directories:
@@ -28,9 +29,12 @@ cache:
 
 env:
   global:
-  - JOBS=2
-  - OPENRESTY_PREFIX=/usr/local/openresty
-  - OPENRESTY_VER=1.11.2.3
+    - JOBS=2
+    - OPENRESTY_PREFIX=/usr/local/openresty
+    - OPENRESTY_VER=1.19.9.1
+  jobs:
+    - TEST_NGINX_USE_VALGRIND=0
+    - TEST_NGINX_USE_VALGRIND=1
 
 install:
 - if [ ! -f download-cache/openresty-$OPENRESTY_VER.tar.gz ]; then
@@ -38,15 +42,31 @@ install:
   fi
 - git clone https://github.com/openresty/test-nginx.git ../test-nginx
 
+# install openresty-openssl111-dev
+- sudo apt-get -y install --no-install-recommends wget gnupg ca-certificates
+- wget -O - https://openresty.org/package/pubkey.gpg | sudo apt-key add -
+- echo "deb http://openresty.org/package/ubuntu $(lsb_release -sc) main"
+  | sudo tee /etc/apt/sources.list.d/openresty.list
+- sudo apt-get update || echo 'apt-get update failed, but ignore it'
+- sudo apt-get -y install --no-install-recommends openresty-openssl111 openresty-openssl111-dev
+
 script:
+- if [ TEST_NGINX_USE_VALGRIND = 1 ]; then export luajit_xcflags='-DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC'; fi
 - tar xzf download-cache/openresty-$OPENRESTY_VER.tar.gz &&
     cd openresty-$OPENRESTY_VER
-- ./configure --prefix=$OPENRESTY_PREFIX -j$JOBS
-    > build.log 2>&1 || (cat build.log && exit 1)
+- ./configure --prefix=$OPENRESTY_PREFIX
+    --with-cc-opt="-I/usr/local/openresty/openssl111/include"
+    --with-ld-opt="-L/usr/local/openresty/openssl111/lib -Wl,-rpath,/usr/local/openresty/openssl111/lib"
+    --with-luajit-xcflags="$luajit_xcflags"
+    -j$JOBS
+        > build.log 2>&1 || (cat build.log && exit 1)
 - make -j$JOBS > build.log 2>&1 ||
     (cat build.log && exit 1)
 - sudo make install > build.log 2>&1 ||
     (cat build.log && exit 1)
 - cd ..
 - export PATH=$OPENRESTY_PREFIX/nginx/sbin:$PATH
-- make test jobs=$JOBS
+- make test jobs=$JOBS > build.log 2>&1 ||
+    (cat build.log && exit 1)
+- cat build.log
+- if [ `grep -c '== Invalid' build.log` -gt 0 ]; then echo 'valgrind complaining' && exit 1; fi

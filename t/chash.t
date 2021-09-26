@@ -356,3 +356,48 @@ size: 480
 --- no_error_log
 [error]
 --- timeout: 30
+
+
+
+=== TEST 6: random key fuzzer
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(ngx.now())
+
+            local ffi = require "ffi"
+            local resty_chash = require "resty.chash"
+
+            local function random_string()
+                local len = math.random(10, 100)
+                local buf = ffi.new("char [?]", len)
+                for i = 0, len - 1 do
+                    buf[i] = math.random(0, 255)
+                end
+
+                return ffi.string(buf, len)
+            end
+
+            for i = 1, 30 do
+                local servers = {}
+
+                local len = math.random(1, 100)
+                for j = 1, len do
+                    local key = random_string()
+                    servers[key] = math.random(1, 100)
+                end
+
+                local chash = resty_chash:new(servers)
+            end
+
+            ngx.say("done")
+        }
+    }
+--- request
+GET /t
+--- response_body
+done
+--- no_error_log
+[error]
+--- timeout: 30
