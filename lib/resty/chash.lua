@@ -19,6 +19,10 @@ local pairs = pairs
 local tostring = tostring
 local tonumber = tonumber
 local bxor = bit.bxor
+local error = error
+
+
+local CHASH_OK = 0
 
 
 ffi.cdef[[
@@ -31,12 +35,12 @@ typedef struct {
 
 void chash_point_init(chash_point_t *points, uint32_t base_hash, uint32_t start,
     uint32_t num, uint32_t id);
-void chash_point_sort(chash_point_t *points, uint32_t size);
+int chash_point_sort(chash_point_t *points, uint32_t size);
 
-void chash_point_add(chash_point_t *old_points, uint32_t old_length,
+int chash_point_add(chash_point_t *old_points, uint32_t old_length,
     uint32_t base_hash, uint32_t from, uint32_t num, uint32_t id,
     chash_point_t *new_points);
-void chash_point_reduce(chash_point_t *old_points, uint32_t old_length,
+int chash_point_reduce(chash_point_t *old_points, uint32_t old_length,
     uint32_t base_hash, uint32_t from, uint32_t num, uint32_t id);
 void chash_point_delete(chash_point_t *old_points, uint32_t old_length,
     uint32_t id);
@@ -117,7 +121,9 @@ local function _precompute(nodes)
         start = start + num
     end
 
-    clib.chash_point_sort(points, npoints)
+    if clib.chash_point_sort(points, npoints) ~= CHASH_OK then
+        error("no memory")
+    end
 
     return ids, points, npoints, newnodes
 end
@@ -194,14 +200,21 @@ local function _incr(self, id, weight)
     local new_npoints = self.npoints + weight * CONSISTENT_POINTS
     if self.size < new_npoints then
         new_points = ffi_new(chash_point_t, new_npoints)
-        self.size = new_npoints
     end
 
     local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
-    clib.chash_point_add(self.points, self.npoints, base_hash,
-                         old_weight * CONSISTENT_POINTS,
-                         weight * CONSISTENT_POINTS,
-                         index, new_points)
+    local rc = clib.chash_point_add(self.points, self.npoints, base_hash,
+                                    old_weight * CONSISTENT_POINTS,
+                                    weight * CONSISTENT_POINTS,
+                                    index, new_points)
+
+    if rc ~= CHASH_OK then
+        error("no memory")
+    end
+
+    if self.size < new_npoints then
+        self.size = new_npoints
+    end
 
     self.points = new_points
     self.npoints = new_npoints
@@ -230,10 +243,15 @@ local function _decr(self, id, weight)
     end
 
     local base_hash = bxor(crc32(tostring(id)), 0xffffffff)
-    clib.chash_point_reduce(self.points, self.npoints, base_hash,
-                            (old_weight - weight) * CONSISTENT_POINTS,
-                            CONSISTENT_POINTS * weight,
-                            index)
+    local from = (old_weight - weight) * CONSISTENT_POINTS
+    local num = CONSISTENT_POINTS * weight
+
+    local rc = clib.chash_point_reduce(self.points, self.npoints, base_hash,
+                                       from, num, index)
+
+    if rc ~= CHASH_OK then
+        error("no memory")
+    end
 
     nodes[id] = old_weight - weight
     self.npoints = self.npoints - CONSISTENT_POINTS * weight

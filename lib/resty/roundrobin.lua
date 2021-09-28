@@ -4,6 +4,7 @@ local next = next
 local tonumber = tonumber
 local setmetatable = setmetatable
 local math_random = math.random
+local error = error
 
 local utils = require "resty.balancer.utils"
 
