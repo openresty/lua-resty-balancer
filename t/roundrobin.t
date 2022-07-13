@@ -213,6 +213,7 @@ ok
 --- no_error_log
 [error]
 
+
 === TEST 6: non-numeric weights
 --- http_config eval: $::HttpConfig
 --- config
@@ -242,5 +243,57 @@ ok
 --- request
 GET /t
 --- error_code: 500
+--- no_error_log
+[error]
+
+
+=== TEST 7: find count with float weights
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(75098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = 6.6,
+                ["server2"] = 3.3,
+                ["server3"] = 1.1,
+            }
+
+            local rr = roundrobin:new(servers)
+
+            local res = {}
+            for i = 1, 100 * 1000 do
+                local id = rr:find()
+
+                if res[id] then
+                    res[id] = res[id] + 1
+                else
+                    res[id] = 1
+                end
+            end
+
+            local keys = {}
+            for id, num in pairs(res) do
+                keys[#keys + 1] = id
+            end
+
+            if #keys ~= 3 then
+                ngx.exit(400)
+            end
+
+            ngx.say("server1: ", res['server1'])
+            ngx.say("server2: ", res['server2'])
+            ngx.say("server3: ", res['server3'])
+        }
+    }
+--- request
+GET /t
+--- response_body
+server1: 60000
+server2: 30000
+server3: 10000
 --- no_error_log
 [error]
