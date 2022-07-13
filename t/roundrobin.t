@@ -212,3 +212,35 @@ GET /t
 ok
 --- no_error_log
 [error]
+
+=== TEST 6: non-numeric weights
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            math.randomseed(9975098)
+
+            local roundrobin = require "resty.roundrobin"
+
+            local servers = {
+                ["server1"] = "1@#$",
+                ["server2"] = "abcd",
+                ["server3"] = ",./",
+                ["server4"] = 1,
+            }
+
+            local rr = roundrobin:new(servers, true)
+
+            -- should not touch here
+            for i = 1, 4 do
+                local id = rr:find()
+            end
+
+            ngx.say("ok")
+        }
+    }
+--- request
+GET /t
+--- error_code: 500
+--- no_error_log
+[error]
