@@ -17,7 +17,8 @@ local mt = { __index = _M }
 
 local _gcd
 _gcd = function (a, b)
-    if b == 0 then
+    b = tonumber(b)
+    if b == 0 or b == nil then
         return a
     end
 
