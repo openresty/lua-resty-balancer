@@ -125,7 +125,7 @@ server3: 10000
             local roundrobin = require "resty.roundrobin"
 
             local servers = {
-                ["server1"] = 1,
+                ["server1"] = 5,
                 ["server2"] = 1,
                 ["server3"] = 1,
                 ["server4"] = 1,

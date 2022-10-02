@@ -66,7 +66,7 @@ function _M.new(_, nodes)
         only_key = only_key,
         max_weight = max_weight,
         gcd = gcd,
-        cw = max_weight,
+        cw = 0,
         last_id = last_id,
     }
     return setmetatable(self, mt)
@@ -79,7 +79,7 @@ function _M.reinit(self, nodes)
 
     self.nodes = newnodes
     self.last_id = get_random_node_id(nodes)
-    self.cw = self.max_weight
+    self.cw = 0
 end
 
 
@@ -169,16 +169,20 @@ local function find(self)
                 break
             end
 
-            if weight >= cw then
+            if self.gcd == 0 then
+                return last_id
+            end
+            
+            if weight > cw then
                 self.cw = cw
                 self.last_id = last_id
                 return last_id
             end
         end
 
-        cw = cw - self.gcd
-        if cw <= 0 then
-            cw = self.max_weight
+        cw = cw + self.gcd
+        if cw >= self.max_weight then
+            cw = 0
         end
     end
 end
