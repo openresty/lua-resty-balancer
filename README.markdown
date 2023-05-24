@@ -47,6 +47,7 @@ Synopsis
     init_by_lua_block {
         local resty_chash = require "resty.chash"
         local resty_roundrobin = require "resty.roundrobin"
+        local resty_swrr = require "resty.swrr"
 
         local server_list = {
             ["127.0.0.1:1985"] = 2,
@@ -73,6 +74,9 @@ Synopsis
 
         local rr_up = resty_roundrobin:new(server_list)
         package.loaded.my_rr_up = rr_up
+
+        local swrr_up = resty_swrr:new(server_list)
+        package.loaded.my_swrr_up = swrr_up
     }
 
     upstream backend_chash {
@@ -105,6 +109,20 @@ Synopsis
         }
     }
 
+    upstream backend_swrr {
+        server 0.0.0.1;
+        balancer_by_lua_block {
+            local b = require "ngx.balancer"
+
+            local swrr_up = package.loaded.my_swrr_up
+
+            -- Note that SWRR picks the first server randomly
+            local server = swrr_up:find()
+
+            assert(b.set_current_peer(server))
+        }
+    }
+
     server {
         location /chash {
             proxy_pass http://backend_chash;
@@ -112,6 +130,10 @@ Synopsis
 
         location /roundrobin {
             proxy_pass http://backend_rr;
+        }
+
+        location /swrr {
+            proxy_pass http://backend_swrr;
         }
     }
 ```
@@ -121,7 +143,7 @@ Synopsis
 Methods
 =======
 
-Both `resty.chash` and `resty.roundrobin` have the same apis.
+Both `resty.chash`, `resty.roundrobin` and `resty.swrr` have the same apis.
 
 [Back to TOC](#table-of-contents)
 
