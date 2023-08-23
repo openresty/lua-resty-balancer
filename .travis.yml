@@ -1,5 +1,5 @@
 os: linux
-dist: trusty
+dist: focal
 
 sudo: required
 
@@ -31,7 +31,7 @@ env:
   global:
     - JOBS=2
     - OPENRESTY_PREFIX=/usr/local/openresty
-    - OPENRESTY_VER=1.19.9.1
+    - OPENRESTY_VER=1.25.1.1
   jobs:
     - TEST_NGINX_USE_VALGRIND=0
     - TEST_NGINX_USE_VALGRIND=1
